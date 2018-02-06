@@ -9,7 +9,6 @@ import os
 import re
 import numpy as np
 import pandas as pd
-from datetime import datetime
 from sklearn import linear_model
 
 import lavender.config as cfg

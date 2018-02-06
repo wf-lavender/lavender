@@ -15,6 +15,9 @@ from pandas.compat import StringIO
 
 
 def _download_stock_codes():
+    """
+    get stock lists direct
+    """
     save_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
 
     request = urllib2.Request(ct.STOCK_LIST_SITE["ts"])
@@ -28,11 +31,12 @@ def _download_stock_codes():
 
 def get_stock_codes():
     """
-    Download stock list from "file.tushare.org/tsdata/all.csv"
+    Download stock list from tushare server("file.tushare.org/tsdata/all.csv").
     """
     data_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
     mtime = os.path.getmtime(data_path)
     pass_time = time.time() - mtime
+    # if stock list files ware modified in last 12h, then read the file directly.
     if pass_time > 12 * ct.SECONDS_IN_HOUR:
         _download_stock_codes()
     return pd.read_csv(data_path, header=None, names=["name", "code"],

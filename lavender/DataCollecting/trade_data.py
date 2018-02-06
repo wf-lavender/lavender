@@ -13,9 +13,8 @@ import tushare as ts
 import lavender.constant as ct
 import stock_code as sc
 import datetime
-import csv
+import threading
 import os
-import re
 import lavender.config as cfg
 
 
@@ -53,6 +52,19 @@ class StockDownloader:
             self.save_dir = cfg.index_dir
         else:
             self.save_dir = cfg.kline_dir
+
+        if self.index:
+            stock_list_path = os.path.join(cfg.stock_code_dir, "StockListIndex" + ct.FILE_EXT['csv'])
+            stock_list = pd.read_csv(stock_list_path, header=None, names=["name", "code"],
+                                     dtype={"code": "str"}, encoding="GBK")
+        else:
+            stock_list = sc.get_stock_codes()
+        codes_list = list(stock_list.code)
+        names_list = list(stock_list.name)
+        self.code_pool = zip(codes_list, names_list)
+
+        self.lock = threading.Lock()
+
         self.st_date, self.ed_date = date_range.strip().split(':')
         if len(self.st_date) == 0:
             self.st_date = None
@@ -85,70 +97,72 @@ class StockDownloader:
                     pass
                 df.sort_index().to_csv(save_path)
 
-    def get_market_stock_data(self):
+    def _get_market_stock_data(self):
         """
         get "Fu Quan" data from Sina website using tushare.
         """
-        if self.index:
-            stock_list_path = os.path.join(self.code_dir, "StockListIndex" + ct.FILE_EXT['csv'])
-            stock_list = pd.read_csv(stock_list_path, header=None, names=["name", "code"],
-                                     dtype={"code": "str"}, encoding="GBK")
-        else:
-            stock_list = sc.get_stock_codes()
-        codes = stock_list.code
-        names = stock_list.name
+        while self.code_pool:
+            with self.lock:
+                try:
+                    code, stock_name = self.code_pool.pop()
+                except IndexError:
+                    pass
 
-        for code, stock_name in zip(codes, names):
             print "%s get data: %s %s" % (ct.NEW_LINE_CHAR, stock_name, ct.NEW_LINE_CHAR)
             self._download_stock_data(code, start=self.st_date, end=self.ed_date,
                                       autype=self.autype, index=self.index)
 
-    def update_code_list_stock_data(self):
+    def _update_code_list_stock_data(self):
         """
         Update stocks listed in code list files.
         """
-        if self.index:
-            stock_list_path = os.path.join(self.code_dir, "StockListIndex"+ct.FILE_EXT['csv'])
-            stock_list = pd.read_csv(stock_list_path, header=None, names=["name", "code"],
-                                     dtype={"code": "str"}, encoding="GBK")
-        else:
-            stock_list = sc.get_stock_codes()
-        codes = stock_list.code
-        names = stock_list.name
 
-        for code, stock_name in zip(codes, names):
-            print("%s update data: %s %s" % (ct.NEW_LINE_CHAR, stock_name, ct.NEW_LINE_CHAR))
-            stock_file = os.path.join(self.save_dir, code+ct.FILE_EXT['csv'])
+        while self.code_pool:
+            with self.lock:
+                try:
+                    code, stock_name = self.code_pool.pop()
+                except IndexError:
+                    pass
 
-            if not os.path.exists(stock_file):
-                self._download_stock_data(code, start=self.st_date, end=self.ed_date,
-                                          autype=self.autype, index=self.index)
+                print("%s update data: %s %s" % (ct.NEW_LINE_CHAR, stock_name, ct.NEW_LINE_CHAR))
+                stock_file = os.path.join(self.save_dir, code+ct.FILE_EXT['csv'])
+
+                if not os.path.exists(stock_file):
+                    self._download_stock_data(code, start=self.st_date, end=self.ed_date,
+                                              autype=self.autype, index=self.index)
+                else:
+                    data_path = os.path.join(self.save_dir, self.data_name % code)
+                    old_data = pd.read_csv(data_path, index_col=0)
+                    continue_date = next_day_str(old_data.index[-1])
+                    print continue_date
+                    new_data = getattr(ts, self.method)(code, start=continue_date, end=self.ed_date,
+                                                        autype=self.autype, index=self.index)
+
+                    if not new_data.empty:
+                        # "get_k_data" use a range of numbers as index,
+                        # while "get_h_data" use date as index.
+                        try:
+                            new_data = new_data.set_index("date")
+                        except KeyError:
+                            pass
+                        new_data = new_data.sort_index()
+                        new_data.index = new_data.index.astype(str)
+                        concat_data = pd.concat([old_data, new_data])
+                        concat_data.to_csv(data_path)
+
+    def run(self, mod="update", n_thread=10):
+        for i_thread in range(n_thread):
+            if mod == "update":
+                threading.Thread(target=self._update_code_list_stock_data).start()
             else:
-                data_path = os.path.join(self.save_dir, self.data_name % code)
-                old_data = pd.read_csv(data_path, index_col=0)
-                continue_date = next_day_str(old_data.index[-1])
-                print continue_date
-                new_data = getattr(ts, self.method)(code, start=continue_date, end=self.ed_date,
-                                                    autype=self.autype, index=self.index)
-
-                if not new_data.empty:
-                    # "get_k_data" use a range of numbers as index,
-                    # while "get_h_data" use date as index.
-                    try:
-                        new_data = new_data.set_index("date")
-                    except KeyError:
-                        pass
-                    new_data = new_data.sort_index()
-                    new_data.index = new_data.index.astype(str)
-                    concat_data = pd.concat([old_data, new_data])
-                    concat_data.to_csv(data_path)
+                threading.Thread(target=self._get_market_stock_data).start()
 
 
 if __name__ == "__main__":
     downloader = StockDownloader()
     # downloader.get_market_stock_data()
 
-    downloader.update_code_list_stock_data()
+    downloader.run("update")
 
     # downloader = StockDownloader(index=True)
-    # downloader.get_market_stock_data()
+    # downloader._get_market_stock_data()
