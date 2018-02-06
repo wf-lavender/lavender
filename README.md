@@ -69,23 +69,21 @@ lavender可以实现：
 **批量下载所有A股历史行情数据**
 
     downloader = StockDownloader(date_range='1990-01-01:', autype='hfq')
-    downloader.get_market_stock_data()
+    downloader.run("init", n_thread=10)
 下载接口批量调用tushare函数（http://tushare.org/trading.html#id2）下载日线数据。
 其中参数*autype*为数据类型，支持：前复权（"qfq"），后复权（"hfq"），不复权（None）。
 这里建议默认下载后复权数据是因为前复权数据的每次更新需要对已下载的数据做更改；而我们做回测实验时，关心的是股价波动的相对值，而非绝对值，因而这里使用后复权数据。
 
 执行命令后，lavender将下载1990年之后的所有A股日线行情数据。
-下载数据以csv格式保存在*data/stocks*目录下。
+默认开启10个线程下载。下载数据以csv格式保存在*data/stocks*目录下。
 
 
 **更新已保存的A股基本面指标数据库：**
 
     downloader = StockDownloader(date_range='1990-01-01:', autype='hfq')
-    downloader.update_code_list_stock_data()
+    downloader.run("update", n_thread=10)
 
 执行命令，lavender将根据已有的数据自动更新至最新的日线数据。参数同上。
-
-*目前lavender是单线程下载，速度较慢，下一步将改用多线程批量下载。
 
 
 ### 3. 基本面分析
@@ -103,7 +101,7 @@ lavender基本面分析模块提供了针对上市公司财报的一系列分析
     indicator_conditions：指标及对应的筛选条件；
     save_name：选择结果保存的文件名；
     num_year：应用条件的年份；
-    筛选出股票默认保存在*result/pool*目录下
+    筛选出股票默认保存在*result/pool*目录下。
     
 
 **生成多只股票多年数据热力图**
@@ -119,6 +117,7 @@ lavender基本面分析模块提供了针对上市公司财报的一系列分析
     table_name：指标所在表名
     indicator：指标名。
 图片默认保存在*result/pics/fundamental*目录下。
+![](lavender/result/pics/fundamental/roe_gt_20.png)
 
     
 **生成公司报表数据**
@@ -135,6 +134,7 @@ lavender基本面分析模块提供了针对上市公司财报的一系列分析
     indicator：报表项目及其所在的报表表名
     save_name：保存的图片名
 图片默认保存在*result/pics/fundamental/code*目录下。
+![](lavender/result/pics/fundamental/600519/600519_cash_flow2.png)
 
 **杜邦分析**
 
