@@ -143,6 +143,7 @@ lavender基本面分析模块提供了针对上市公司财报的一系列分析
     dupont_decomposition("600519", save_name="600519_dupont.png")
     
 杜邦分析函数参数为股票代码和保存的图片名，图片默认保存在*result/pics/fundamental/code*目录下。
+![](lavender/result/pics/fundamental/600519/600519_dupont.png)
 
 
 ### 4. 策略回测
@@ -244,6 +245,7 @@ lavender基本面分析模块提供了针对上市公司财报的一系列分析
 可视化回测结果：
 
     portfolio.plot("roe_gt_20.png")
+![](lavender/result/pics/technical/dual_ma_strategy/600519.png)
 
 调用Portfolio类中的plot方法，接受参数为保存的图片名。
 结果图片默认保存在*result/pics/technical*目录下。
