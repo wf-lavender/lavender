@@ -1,7 +1,14 @@
-data/
-result
+lavender/data/
+lavender/result
 .idea
+account_task
+test
 
-
-
+*.pyc
+.DS_Store
+lavender/strategy/*csv
+lavender/strategy/*ps
+lavender/strategy/portfolio*
+lavender/*txt
+lavender/util/*png
 
