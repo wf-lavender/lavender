@@ -48,15 +48,15 @@ def get_classified_code(classify_stand, category=None, save_name=None, **kwargs)
                         save_path, sep=" ", index=False, header=False, encoding="utf8")
                 return category_data.code[category_data.c_name == category.decode("utf8")]
             else:
-                print "%s not in %s standards: " % (category, classify_stand)
+                print("%s not in %s standards: " % (category, classify_stand))
                 for c_name in category_data.c_name.unique():
-                    print c_name
+                    print(c_name)
     else:
-        print "Supported standards: %s." % [st for st in ct.CLASSIFY_STANDARD]
+        print("Supported standards: %s." % [st for st in ct.CLASSIFY_STANDARD])
 
 
 if __name__ == "__main__":
     # print get_classified_code("industry", category="家电行业", save_name="家电行业.csv".decode("utf8"))
-    print get_classified_code("industry", category="煤炭行业", save_name="煤炭行业.csv".decode("utf8"))
+    print(get_classified_code("industry", category="煤炭行业", save_name="煤炭行业.csv".decode("utf8")))
 
     # print get_classified_code("zz500s", save_name="zz500.csv")
