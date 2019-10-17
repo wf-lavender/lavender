@@ -65,10 +65,10 @@ def get_market_stock_codes(market):
         # !! cannot get the whole ShenZhen codes! (1259 stocks got)
         market_xpath = '/html/body/div[@class="qox"]//ul[2]//li/a/text()'
     else:
-        print "Wrong market keyword! (only 'SH' and 'SZ' supported)"
+        print("Wrong market keyword! (only 'SH' and 'SZ' supported)")
         return
     market_codes = tree.xpath(market_xpath)
-    print len(market_codes)
+    print(len(market_codes))
     codes_series = pd.Series(market_codes)
     # print codes_series
     # extract names and codes in parentheses.
@@ -79,4 +79,4 @@ def get_market_stock_codes(market):
 if __name__ == "__main__":
     # get_market_stock_codes("SH")
     # get_market_stock_codes("SZ")
-    print get_stock_codes()
+    print(get_stock_codes())
