@@ -76,11 +76,11 @@ class GenPlot:
         variables = list(variables)
         for ikey in variables:
             if ikey not in self.k_line:
-                print "warning: %s not in %s" % (ikey, str(self.k_line.columns.values))
+                print("warning: %s not in %s" % (ikey, str(self.k_line.columns.values)))
                 variables.remove(ikey)
             else:
                 if "STD" in ikey:
-                    std_days = re.search('\d+', ikey).group()
+                    std_days = re.search('d+', ikey).group()
                     if "MA"+std_days in self.k_line:
                         ma_series = self.k_line["MA"+std_days]
                         std_series = self.k_line[ikey]
@@ -88,8 +88,8 @@ class GenPlot:
                         std_up.name = "STD"
                         std_down = ma_series - std_series
                     else:
-                        print "warning: %s-relative MA line not exist in %s" \
-                                    % (ikey, str(self.k_line.columns.values))
+                        print("warning: %s-relative MA line not exist in %s"
+                              % (ikey, str(self.k_line.columns.values)))
                     variables.remove(ikey)
         series_list = [self.k_line[ikey] for ikey in variables]
         if std_up is not None and std_down is not None:

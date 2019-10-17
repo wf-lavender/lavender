@@ -4,19 +4,19 @@
     the website listed in config.py
 """
 import lavender.config as cfg
-import urllib2
 import time
 import os
 import lxml.html
 import lavender.constant as ct
 import pandas as pd
 from lxml import etree
-from pandas.compat import StringIO
+# from pandas.compat import StringIO
+from io import StringIO
 
 
 def _download_stock_codes():
     """
-    get stock lists direct
+    get stock lists directly
     """
     save_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
 
@@ -24,7 +24,7 @@ def _download_stock_codes():
     text = urllib2.urlopen(request, timeout=10).read()
     text = text.decode('GBK')
     # text = text.replace('--', '')
-    code_list = pd.read_csv(StringIO(text), dtype={'code':'object'})
+    code_list = pd.read_csv(StringIO(text), dtype={'code': 'object'})
     code_list.to_csv(save_path, header=False, index=False,
                      encoding="GBK", columns=["name", "code"])
 
@@ -51,6 +51,8 @@ def get_market_stock_codes(market):
     Args:
         market: <str>: 'SH' or 'SZ'
     """
+    import urllib2
+
     html = urllib2.urlopen(ct.STOCK_LIST_SITE["em"])
     save_path = os.path.join(cfg.stock_code_dir, 'StockList%s.csv' % market)
     content = html.read()

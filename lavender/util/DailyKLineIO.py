@@ -159,7 +159,7 @@ class KLine:
         ref_kline = KLine(os.path.join(cfg.index_dir, ref_index+ct.FILE_EXT["csv"]))
         ref_month_return = _month_return(ref_kline.stock_data)
 
-        st_date, ed_date = re.split('\D+', date_range.strip())
+        st_date, ed_date = re.split('D+', date_range.strip())
         if len(st_date) == 0:
             st_date = None
         if len(ed_date) == 0:
@@ -253,7 +253,7 @@ class KLine:
         Args:
             date:
         """
-        st_date, ed_date = re.split('\D+', date.strip())
+        st_date, ed_date = re.split('D+', date.strip())
         if len(st_date) == 0:
             st_date = None
         if len(ed_date) == 0:
@@ -274,7 +274,7 @@ class Indicator(KLine):
 if __name__ == '__main__':
 
     kline = KLine("000895")
-    print "required return: %0.4f" % kline.required_return(ref_index="000300", market_return=0.08)
+    print("required return: %0.4f" % kline.required_return(ref_index="000300", market_return=0.08))
     # print kline.date[-5:-1]
     # print kline.stock_data[:5]
     # # print kline.stock_data.ix['20151020']
@@ -290,10 +290,10 @@ if __name__ == '__main__':
     # kline.date_cut('2010:')
 
     # print kline.stock_data[:5]
-    print kline.tr[-20:]
-    print kline.atr(10)
+    print(kline.tr[-20:])
+    print(kline.atr(10))
     # print kline.ma(20)[18:22]
-    print kline.support[~np.isnan(kline.support)]
+    print(kline.support[~np.isnan(kline.support)])
     kline.ma(60)
     kline.std_dev(60)
     kline.ma(150)

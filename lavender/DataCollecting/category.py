@@ -41,12 +41,12 @@ def get_classified_code(classify_stand, category=None, save_name=None, **kwargs)
                 category_data.to_csv(save_path, sep=" ", index=False, header=False, encoding="utf8")
             return category_data.code
         else:
-            if category.decode("utf8") in category_data.c_name.unique():
+            if category in category_data.c_name.unique():
                 if save_name is not None:
                     save_path = os.path.join(cfg.pool_dir, save_name)
-                    category_data[category_data.c_name == category.decode("utf8")].to_csv(
+                    category_data[category_data.c_name == category].to_csv(
                         save_path, sep=" ", index=False, header=False, encoding="utf8")
-                return category_data.code[category_data.c_name == category.decode("utf8")]
+                return category_data.code[category_data.c_name == category]
             else:
                 print("%s not in %s standards: " % (category, classify_stand))
                 for c_name in category_data.c_name.unique():
@@ -57,6 +57,6 @@ def get_classified_code(classify_stand, category=None, save_name=None, **kwargs)
 
 if __name__ == "__main__":
     # print get_classified_code("industry", category="家电行业", save_name="家电行业.csv".decode("utf8"))
-    print(get_classified_code("industry", category="煤炭行业", save_name="煤炭行业.csv".decode("utf8")))
+    print(get_classified_code("industry", category="煤炭行业", save_name="煤炭行业.csv"))
 
     # print get_classified_code("zz500s", save_name="zz500.csv")
