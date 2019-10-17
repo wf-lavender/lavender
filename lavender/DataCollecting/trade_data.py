@@ -85,7 +85,7 @@ class StockDownloader:
             os.makedirs(self.save_dir)
         save_path = os.path.join(self.save_dir, self.data_name % code)
         if not overwrite and os.path.exists(save_path):
-            print "%s already exist!" % save_path
+            print("%s already exist!" % save_path)
         else:
             df = getattr(ts, self.method)(code, **kwargs)
             if not df.empty:
@@ -108,7 +108,7 @@ class StockDownloader:
                 except IndexError:
                     pass
 
-            print "%s get data: %s %s" % (ct.NEW_LINE_CHAR, stock_name, ct.NEW_LINE_CHAR)
+            print("%s get data: %s %s" % (ct.NEW_LINE_CHAR, stock_name, ct.NEW_LINE_CHAR))
             self._download_stock_data(code, start=self.st_date, end=self.ed_date,
                                       autype=self.autype, index=self.index)
 
@@ -134,7 +134,7 @@ class StockDownloader:
                     data_path = os.path.join(self.save_dir, self.data_name % code)
                     old_data = pd.read_csv(data_path, index_col=0)
                     continue_date = next_day_str(old_data.index[-1])
-                    print continue_date
+                    print(continue_date)
                     new_data = getattr(ts, self.method)(code, start=continue_date, end=self.ed_date,
                                                         autype=self.autype, index=self.index)
 
