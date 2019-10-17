@@ -76,7 +76,7 @@ def _get_fin_statement(code, state_type, years, retry_count=3, pause=0.001):
             state_data["season"] = dates.month/4 + 1
             state_data["year"] = dates.year
             return state_data
-        except Exception, e:
+        except Exception as e:
             print(e)
             print("Try Again...")
 
@@ -108,8 +108,8 @@ def get_fin_states_csv(statement, retry_count=3):
                     os.makedirs(save_dir)
                 save_path = os.path.join(save_dir, save_name)
                 state.to_csv(save_path)
-            except socket.error, urllib2.HTTPError:
-                print "Try Again..."
+            except socket.error as urllib2.HTTPError:
+                print("Try Again...")
                 time.sleep(0.1)
 
 
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     # downloader.update_table("report")
 
     for state_type in ct.FIN_STATE_NAME:
-    #     downloader.get_fin_state(state_type)
+        # downloader.get_fin_state(state_type)
         downloader.update_fin_state(state_type)
     # print _get_fin_statement("603938", "BalanceSheet", range(2014, 2017))
 

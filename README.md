@@ -47,7 +47,7 @@ lavender可以实现：
     downloader = BasicsDownloader(year_range="1990:")
     downloader.get_table(table)
 
-数据来源于新浪财经，下载接口直接批量调用tushare函数（参考：http://tushare.org/fundamental.html#id2）
+数据来源于新浪财经，下载接口直接批量调用tushare函数（参考：[tushare基本面接口](http://tushare.org/fundamental.html#id2)）
 其中*table*为基本面指标数据表，支持：
 1. 业绩报告： "report"
 2. 盈利能力： "profit"
@@ -71,7 +71,7 @@ lavender可以实现：
     downloader = StockDownloader(date_range='1990-01-01:', autype='hfq')
     downloader.run("init", n_thread=10)
 下载接口批量调用tushare函数（http://tushare.org/trading.html#id2）下载日线数据。
-其中参数*autype*为数据类型，支持：前复权（"qfq"），后复权（"hfq"），不复权（None）。
+其中参数*autype*为数据类型，支持：前复权（"qfq"），后复权（"hfq"），不复权（None）,n_thread为下载开启的线程数量。
 这里建议默认下载后复权数据是因为前复权数据的每次更新需要对已下载的数据做更改；而我们做回测实验时，关心的是股价波动的相对值，而非绝对值，因而这里使用后复权数据。
 
 执行命令后，lavender将下载1990年之后的所有A股日线行情数据。

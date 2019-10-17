@@ -119,4 +119,4 @@ def get_code_name(code):
 
 
 if __name__ == "__main__":
-    print get_code_name("600519")
+    print(get_code_name("600519"))

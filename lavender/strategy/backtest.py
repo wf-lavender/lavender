@@ -194,7 +194,7 @@ class BackTest(Strategy, PerformanceMeasure):
             self.k_line.date_cut(date_range)
         PerformanceMeasure.__init__(self, self.k_line.date)
         if self.ndays == 0:
-            print 'warning: stock data empty!'
+            print('warning: stock data empty!')
 
         self.brokerage = brokerage
         self.stamp_duty = stamp_duty
@@ -362,7 +362,7 @@ class Portfolio(Strategy, PerformanceMeasure):
 
         PerformanceMeasure.__init__(self, dates)
         if self.ndays == 0:
-            print 'warning: stock data empty!'
+            print('warning: stock data empty!')
         # for code in self.klines:
         #     self.klines[code]
 
@@ -598,9 +598,9 @@ if __name__ == '__main__':
     # ***********************
     t0 = time.time()
     portfolio = Portfolio(["roe_gt_15.csv".decode("utf8"), ], date_range=None)
-    print portfolio.trade_open("extremum_contrary_strategy")
+    print(portfolio.trade_open("extremum_contrary_strategy"))
     portfolio.plot("roe_gt_15.png".decode("utf8"))
-    print "time cost:", time.time() - t0
+    print("time cost:", time.time() - t0)
 
     # Show pictures for net value of simulation.
     # print "max draw down:", test.max_draw_down()

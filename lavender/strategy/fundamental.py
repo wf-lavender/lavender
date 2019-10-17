@@ -80,7 +80,7 @@ def show_single_code_statement(code, indicators, season=4, draw_pic=True,
         else:
             save_dir = os.path.join(cfg.fundamental_pic_dir, code)
             if not os.path.exists(save_dir):
-                os.system("%s %s" % (ct.SYS_COMMAND["mkdir"], save_dir))
+                os.makedirs(save_dir)
             save_path = os.path.join(save_dir, save_name)
             savefig(save_path)
 
@@ -113,7 +113,7 @@ def show_single_code_basics(code, indicators, season=4,
         else:
             save_dir = os.path.join(cfg.fundamental_pic_dir, code)
             if not os.path.exists(save_dir):
-                os.system("%s %s" % (ct.SYS_COMMAND["mkdir"], save_dir))
+                os.makedirs(save_dir)
             save_path = os.path.join(save_dir, save_name)
             savefig(save_path)
 
@@ -232,7 +232,7 @@ def dupont_decomposition(code, season=4, draw_pic=True, save_name=None):
     dupont = pd.concat([net_profit_ratio, asset_turnover, leverage,
                         net_profit_ratio*asset_turnover*leverage], axis=1)
     dupont.columns = ["net profit ratio", "asset turnover", "leverage", "roe"]
-    print dupont
+    print(dupont)
     if draw_pic:
         matplotlib.style.use('bmh')
 
@@ -256,7 +256,7 @@ def dupont_decomposition(code, season=4, draw_pic=True, save_name=None):
         else:
             save_dir = os.path.join(cfg.fundamental_pic_dir, code)
             if not os.path.exists(save_dir):
-                os.system("%s %s" % (ct.SYS_COMMAND["mkdir"], save_dir))
+                os.makedirs(save_dir)
             save_path = os.path.join(save_dir, save_name)
             savefig(save_path)
 
@@ -315,10 +315,10 @@ def cash_ps_vs_price(save_name):
             except KeyError:
                 continue
 
-            print "%s %s : price: %s, cash: %s\n" % (code, name, price, cash)
+            print("%s %s : price: %s, cash: %s\n" % (code, name, price, cash))
             ratio = cash/price
             if ratio > 0.8:
-                print 50*"*" + " %s %s " % (code, name) + 50*"*"
+                print(50*"*" + " %s %s " % (code, name) + 50*"*")
                 fout.write("%s " % code)
                 fout.write(name.encode("utf8"))
                 fout.write(" %s %s %s\n" % (cash, price, ratio))
@@ -409,7 +409,7 @@ def get_condition_indicator(table_name, indicator_conditions, save_name,
         # stock exchange history longer than n year.
         if eval("%s%s" % (len(select_table), nyear_conditions)) and _if_has_year(code, first_year):
             picked_codes.append(code)
-    print "Number of stocks picked: %d" % len(picked_codes)
+    print("Number of stocks picked: %d" % len(picked_codes))
 
     fout = open(os.path.join(cfg.pool_dir, save_name), "w")
     for code in picked_codes:
@@ -475,12 +475,12 @@ def stock_variation_cluster(pool_name, date_range="2012:2017",
     else:
         pool_variations[np.isnan(pool_variations)] = fill_nan
     edge_model.fit(pool_variations)
-    print edge_model.covariance_.shape
+    print(edge_model.covariance_.shape)
 
     _, labels = cluster.affinity_propagation(edge_model.covariance_)
     n_labels = labels.max()
 
-    print labels
+    print(labels)
     for i in range(n_labels + 1):
         print('Cluster %i: %s' % ((i + 1), ', '.join(pooled_names[labels == i])))
 
@@ -535,7 +535,7 @@ if __name__ == "__main__":
     #                           vmax=50, vmin=-10)
 
     # 现金流量表分析
-    sel_code = "600377"
+    sel_code = "002230"
     show_single_code_statement(sel_code, {"Statement_ProfitStatement": ["五、净利润", ],
                                           "Statement_CashFlow": ["经营活动产生的现金流量净额", ],
                                           "Statement_BalanceSheet": ["存货", ]},
