@@ -7,6 +7,7 @@ import lavender.config as cfg
 import time
 import os
 import lxml.html
+import requests
 import lavender.constant as ct
 import pandas as pd
 from lxml import etree
@@ -20,13 +21,17 @@ def _download_stock_codes():
     """
     save_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
 
-    request = urllib2.Request(ct.STOCK_LIST_SITE["ts"])
-    text = urllib2.urlopen(request, timeout=10).read()
-    text = text.decode('GBK')
+    # request = urllib2.Request(ct.STOCK_LIST_SITE["ts"])
+    # text = urllib2.urlopen(request, timeout=10).read()
+    response = requests.get(ct.STOCK_LIST_SITE["ts"])
+    print(response.encoding)
+    response.encoding = "GBK"
+    text = response.text
     # text = text.replace('--', '')
+    print(text)
+    # exit(1)
     code_list = pd.read_csv(StringIO(text), dtype={'code': 'object'})
-    code_list.to_csv(save_path, header=False, index=False,
-                     encoding="GBK", columns=["name", "code"])
+    code_list.to_csv(save_path, header=False, index=False, columns=["name", "code"])
 
 
 def get_stock_codes():
@@ -37,10 +42,11 @@ def get_stock_codes():
     mtime = os.path.getmtime(data_path)
     pass_time = time.time() - mtime
     # if stock list files ware modified in last 12h, then read the file directly.
-    if pass_time > 12 * ct.SECONDS_IN_HOUR:
-        _download_stock_codes()
+    print(pass_time)
+    # if pass_time > 12 * ct.SECONDS_IN_HOUR:
+    _download_stock_codes()
     return pd.read_csv(data_path, header=None, names=["name", "code"],
-                       dtype={"code": "str"}, encoding="GBK")
+                       dtype={"code": "str"},)   # encoding="GBK")
 
 
 def get_market_stock_codes(market):
