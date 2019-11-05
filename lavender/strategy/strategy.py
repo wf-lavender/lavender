@@ -9,7 +9,7 @@ import numpy as np
 
 
 # TODO: use a completed object as input attributes of strategies.
-class Strategy(object):
+class Strategy:
     """
     Edit strategies here.
     """

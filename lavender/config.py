@@ -6,7 +6,8 @@ support_window = 20
 resistance_window = 20
 lag_window = 500
 
-work_dir = r"C:\Users\Administrator\Desktop\lavender\lavender"
+# work_dir = r"C:\Users\Administrator\Desktop\lavender\lavender"
+work_dir = os.path.dirname(__file__)
 
 # saving directory of stock data
 root_data_dir = os.path.join(work_dir, "data")
@@ -24,9 +25,9 @@ profit_statement_dir = os.path.join(root_data_dir, "fin_stat", "income")
 cash_flow_dir = os.path.join(root_data_dir, "fin_stat", "cash_flow")
 
 # directory of filtered stocks
-pool_dir = os.path.join(work_dir, "result\pool")
+pool_dir = os.path.join(work_dir, "result", "pool")
 
 # directory of pictures output
-root_pic_dir = os.path.join(work_dir, "result\pics")
+root_pic_dir = os.path.join(work_dir, "result", "pics")
 fundamental_pic_dir = os.path.join(root_pic_dir, "fundamental")
 technical_pic_dir = os.path.join(root_pic_dir, "technical")

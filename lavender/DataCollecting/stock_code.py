@@ -1,7 +1,7 @@
 # coding = utf-8
 """
-    picking ShangHai and ShenZhen stock code from 
-    the website listed in config.py
+picking ShangHai and ShenZhen stock code from
+the website listed in config.py
 """
 import lavender.config as cfg
 import time
@@ -18,18 +18,16 @@ from io import StringIO
 def _download_stock_codes():
     """
     get stock lists directly
+    获取股票名和股票代码对应列表
     """
     save_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
 
     # request = urllib2.Request(ct.STOCK_LIST_SITE["ts"])
     # text = urllib2.urlopen(request, timeout=10).read()
     response = requests.get(ct.STOCK_LIST_SITE["ts"])
-    print(response.encoding)
     response.encoding = "GBK"
     text = response.text
-    # text = text.replace('--', '')
-    print(text)
-    # exit(1)
+
     code_list = pd.read_csv(StringIO(text), dtype={'code': 'object'})
     code_list.to_csv(save_path, header=False, index=False, columns=["name", "code"])
 
@@ -39,10 +37,9 @@ def get_stock_codes():
     Download stock list from tushare server("file.tushare.org/tsdata/all.csv").
     """
     data_path = os.path.join(cfg.stock_code_dir, 'StockList.csv')
-    mtime = os.path.getmtime(data_path)
-    pass_time = time.time() - mtime
+    # mtime = os.path.getmtime(data_path)
+    # pass_time = time.time() - mtime
     # if stock list files ware modified in last 12h, then read the file directly.
-    print(pass_time)
     # if pass_time > 12 * ct.SECONDS_IN_HOUR:
     _download_stock_codes()
     return pd.read_csv(data_path, header=None, names=["name", "code"],
@@ -51,7 +48,7 @@ def get_stock_codes():
 
 def get_market_stock_codes(market):
     """
-    deprecated!
+    Deprecated!
     get code lists of stocks from "http://quote.eastmoney.com/stocklist.html".
     bugs: cannot get the whole ShenZhen codes! (1259 stocks got)
     Args:

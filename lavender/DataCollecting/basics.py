@@ -18,7 +18,8 @@ import lxml.html
 import time
 import socket
 import threading
-import urllib2
+import requests
+# import urllib2    urllib2 deprecated in python3
 import lavender.config as cfg
 import tushare as ts
 import lavender.constant as ct
@@ -26,20 +27,26 @@ import numpy as np
 import pandas as pd
 import stock_code as sc
 from lxml import etree
+from bs4 import BeautifulSoup
 from datetime import datetime
 from sqlalchemy import create_engine
-from urllib2 import urlopen, Request
-from pandas.compat import StringIO
+# from urllib2 import urlopen, Request     python2
+# from pandas.compat import StringIO        python2
+from io import StringIO
 
 
-def _get_fin_statement(code, state_type, years, retry_count=3, pause=0.001):
+def _get_fin_statement(code, fin_state_type, years, retry_count=3, pause=0.001):
     """
     Get selected financial statement of selected stock code from 
     the Sina website.
+
+
     Args:
-        code: 
-        state_type: 
-        years:
+        code: <str>: 股票代码
+        fin_state_type: <str>: 报表类型: 资产负债表："BalanceSheet"
+                                         利润表："ProfitStatement"
+                                         现金流量表："CashFlow"
+        years: <list: int>:
         retry_count: <int>:
         pause: 
     Returns:
@@ -51,29 +58,37 @@ def _get_fin_statement(code, state_type, years, retry_count=3, pause=0.001):
         try:
             for year in years:
                 ct.write_console()
-                request = Request(ct.FIN_STATE_SITE % (state_type, code, year))
-                text = urlopen(request, timeout=20).read()
-                text = text.decode('GBK')
-                text = text.replace('--', "")     # fill '--' with NaN
-                # text = text.replace('--', "0")    # fill '--' with 0
-                html = lxml.html.parse(StringIO(text))
-                node = html.xpath(r'//tbody')
-                if len(node) > 0:
-                    str_node = etree.tostring(node[0])
-                    str_node = '<table>%s</table>' % str_node
-                    df = pd.read_html(str_node, header=0, index_col=0)[0]
+                response = requests.get(ct.FIN_STATE_SITE % (fin_state_type, code, str(year)))
+                response.encoding = "GBK"
+                markup = response.text
+                markup = markup.replace('--', "")     # fill '--' with NaN
+                # markup = markup.replace('--', "0")    # fill '--' with 0
+                soup = BeautifulSoup(markup, "html5lib", )
+                # Don't use <tbody> tag, because soup.find_all('tbody') would catch <table> tags as well!
+                table_node = soup.find_all('table', attrs={'id': 'BalanceSheetNewTable0'})[0]
+                # print(ct.FIN_STATE_SITE % (fin_state_type, code, year))
+                tbody_node = str(table_node.tbody).replace("tbody", "table")
+                # print(tbody_node)
+                df = pd.read_html(tbody_node, header=0, index_col=0)[0]
 
-                    # debug: data of 603801/603938 have duplicated columns in 2014-2016
-                    # http://money.finance.sina.com.cn/corp/go.php/vFD_BalanceSheet/stockid/603801/ctrl/2016/displaytype/4.phtml
-                    df.columns = map(lambda x: x[:10], df.columns)
-                    df.dropna(axis=1, how="all", inplace=True)
-                    df = df.T.drop_duplicates().T
+                # debug: data of 603801/603938 have duplicated columns in 2014-2016
+                # http://money.finance.sina.com.cn/corp/go.php/vFD_BalanceSheet/stockid/603801/ctrl/2016/displaytype/4.phtml
+                # update on 2019.11.05, the bad data have been fixed.
+                # df.columns = map(lambda x: x[:10], df.columns)
 
-                    state_data = state_data.append(df.transpose().iloc[::-1])
-                    time.sleep(pause)
-            # print state_data
+                df.dropna(axis=1, how="all", inplace=True)
+                # All columns of the first row equal nan, drop it.
+                df = df[pd.notna(df.index)]
+
+                # Is there any duplicates?
+                # df = df.T.drop_duplicates().T
+                state_data = state_data.append(df.transpose().iloc[::-1])
+                time.sleep(pause)
+
             dates = pd.to_datetime(state_data.index)
-            state_data["season"] = dates.month/4 + 1
+            # print(dates.month / 3)
+            # state_data["season"] = dates.month / 4 + 1
+            state_data["season"] = dates.month / 3
             state_data["year"] = dates.year
             return state_data
         except Exception as e:
@@ -108,7 +123,7 @@ def get_fin_states_csv(statement, retry_count=3):
                     os.makedirs(save_dir)
                 save_path = os.path.join(save_dir, save_name)
                 state.to_csv(save_path)
-            except socket.error as urllib2.HTTPError:
+            except socket.error:  # or urllib2.HTTPError:
                 print("Try Again...")
                 time.sleep(0.1)
 
@@ -130,7 +145,7 @@ class BasicsDownloader:
 
     def get_fin_state(self, state_type):
         """
-    
+        创建财务报表数据库文件，文件已存在强制下载则可能导致重复或遗漏。
         Returns:
         """
         if state_type not in ct.FIN_STATE_NAME:
@@ -158,11 +173,10 @@ class BasicsDownloader:
 
     def update_fin_state(self, state_type):
         """
+        更新财务报表数据库文件
         Args:
             state_type:
-
         Returns:
-
         """
         db_path = os.path.join(self.db_dir, "Statement_%s.db" % state_type)
         conn = sqlite3.connect(db_path)
@@ -288,16 +302,18 @@ class BasicsDownloader:
 
 
 if __name__ == "__main__":
+    pd.set_option("max_columns", 10)
+
     downloader = BasicsDownloader(year_range="2016:")
     # for table in ['report', 'profit', 'operation', 'growth', 'debtpaying', 'cashflow']:
     #     downloader.get_table(table)
     # downloader.get_table("report")
     # downloader.update_table("report")
 
-    for state_type in ct.FIN_STATE_NAME:
-        # downloader.get_fin_state(state_type)
-        downloader.update_fin_state(state_type)
-    # print _get_fin_statement("603938", "BalanceSheet", range(2014, 2017))
+    # for state_type in ct.FIN_STATE_NAME:
+    #     downloader.get_fin_state(state_type)
+    #     downloader.update_fin_state(state_type)
+    print(_get_fin_statement("603938", "BalanceSheet", range(2017, 2019), retry_count=1))
 
     # get_fin_states_csv("ProfitStatement")
     # downloader.update_fin_state("BalanceSheet")
