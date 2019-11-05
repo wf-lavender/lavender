@@ -132,7 +132,7 @@ class BasicsDownloader:
     """
     class for downloading fundamental data of stocks.
     """
-    def __init__(self, year_range='1990:'):
+    def __init__(self, year_range='1990:', save_format="csv"):
         """
         initialization.
         Args:
@@ -140,6 +140,7 @@ class BasicsDownloader:
         """
         self.years = ct.get_years(year_range)
         self.db_dir = os.path.join(cfg.root_data_dir, cfg.table_subdir)
+        self.save_format = save_format
         if not os.path.exists(self.db_dir):
             os.makedirs(self.db_dir)
 
